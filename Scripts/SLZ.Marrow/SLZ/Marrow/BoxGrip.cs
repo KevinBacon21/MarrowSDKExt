@@ -245,12 +245,12 @@ namespace SLZ.Marrow
 			if (_boxCollider && renderGizmos && Selection.activeGameObject == gameObject)
 			{
 				//Correctly setting the Gizmo matrix for the rest of the Gizmos. Thank you Cam for the base setup of this!
-				Gizmos.matrix = Matrix4x4.TRS(transform.position + transform.rotation * Vector3.Scale(_boxCollider.center, transform.lossyScale), transform.rotation, transform.lossyScale);
 				Vector3 halfSize = _boxCollider.size * 0.5f;
+				Gizmos.matrix = Matrix4x4.TRS(transform.position + transform.rotation * Vector3.Scale(_boxCollider.center, transform.lossyScale), transform.rotation, transform.lossyScale);
 
 				if (canBeFaceGrabbed)
 				{
-					float faceCubeDepth = 0.01f;
+					float faceCubeDepth = 0.01f * Mathf.Clamp01(halfSize.magnitude);
 					//PositiveX Gizmo
 					if (enabledFaces.HasFlag(Faces.PositiveX))
 					{
@@ -290,7 +290,7 @@ namespace SLZ.Marrow
 				}
 				if (canBeEdgeGrabbed)
 				{
-					float edgeCubeDepth = 0.025f;
+					float edgeCubeDepth = 0.02f * halfSize.magnitude;
 					//XY Axis Edges
 					if (enabledEdges.HasFlag(Edges.PositiveXPositiveY))
 					{
@@ -357,8 +357,8 @@ namespace SLZ.Marrow
 				}
 				if (canBeCornerGrabbed)
 				{
-					float cornerRadius = Mathf.Max(cornerHandPoseRadius, 0.1f) / 2 * Mathf.Clamp01(halfSize.magnitude);
-					if (enabledCorners.HasFlag(Corners.PositiveXPositiveYPositiveZ))
+					float cornerRadius = 0.03f * halfSize.magnitude;
+                    if (enabledCorners.HasFlag(Corners.PositiveXPositiveYPositiveZ))
 					{
 						Gizmos.color = new Color(1f, 1f, 1f, 1f);
 						Gizmos.DrawSphere(Vector3.Scale(halfSize, Vector3.right + Vector3.up + Vector3.forward), cornerRadius);
@@ -462,10 +462,11 @@ namespace SLZ.Marrow
 				{
 					Vector3 halfSize = boxGripRef._boxCollider.size * 0.5f;
 					Handles.matrix = Matrix4x4.TRS(boxTransform.position + boxTransform.rotation * Vector3.Scale(boxGripRef._boxCollider.center, boxTransform.lossyScale), boxTransform.rotation, Vector3.Scale(boxTransform.lossyScale, halfSize));
-					Color handlesColorMult = new Color(3f, 3f, 3f, 1f);
+					Color handlesColorMult = new Color(2f, 2f, 2f, 1f);
+                    Handles.matrix = Matrix4x4.TRS(boxTransform.position + boxTransform.rotation * Vector3.Scale(boxGripRef._boxCollider.center, boxTransform.lossyScale), boxTransform.rotation, Vector3.Scale(boxTransform.lossyScale, halfSize));
 					if (boxGripRef.canBeFaceGrabbed)
 					{
-                        Handles.lighting = false;
+                    Handles.lighting = false;
                         //Face handles
                         float cubeSize = 0.5f;
 				        Handles.color = new Color(1f, 0f, 0f, 1f) * handlesColorMult;
@@ -505,83 +506,83 @@ namespace SLZ.Marrow
 							boxGripRef.enabledFaces ^= BoxGrip.Faces.NegativeZ;
 						}
 					}
+                    Handles.matrix = Matrix4x4.TRS(boxTransform.position + boxTransform.rotation * Vector3.Scale(boxGripRef._boxCollider.center, boxTransform.lossyScale), boxTransform.rotation, boxTransform.lossyScale);
 					if (boxGripRef.canBeEdgeGrabbed)
 					{
-                        //Edge handles
-						float cubeSize = 0.15f;
+                    //Edge handles
+                    float cubeSize = 0.03f * halfSize.magnitude;
 						Handles.lighting = true;
-                        Handles.zTest = UnityEngine.Rendering.CompareFunction.LessEqual;
                         //XY Axis Edges
                         Handles.color = new Color(1f, 1f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.up, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.up, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.PositiveXPositiveY;
                         }
                         Handles.color = new Color(0f, 1f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.up, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.up, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.NegativeXPositiveY;
                         }
                         Handles.color = new Color(1f, 0f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.down, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.down, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.PositiveXNegativeY;
                         }
                         Handles.color = new Color(0f, 0.1f, 0.3f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.down, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.down, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.NegativeXNegativeY;
                         }
                         //XZ Axis Edges
                         Handles.color = new Color(1f, 0f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.forward, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.forward, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.PositiveXPositiveZ;
                         }
                         Handles.color = new Color(0f, 0f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.forward, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.forward, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.NegativeXPositiveZ;
                         }
                         Handles.color = new Color(1f, 0f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.back, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.back, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.PositiveXNegativeZ;
                         }
                         Handles.color = new Color(0f, 0.5f, 0.35f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.back, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.back, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.NegativeXNegativeZ;
                         }
                         //YZ Axis Edges
                         Handles.color = new Color(0f, 1f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.up + Vector3.forward, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.up + Vector3.forward, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.PositiveYPositiveZ;
                         }
                         Handles.color = new Color(0f, 0f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.down + Vector3.forward, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.down + Vector3.forward, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.NegativeYPositiveZ;
                         }
                         Handles.color = new Color(0f, 1f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.up + Vector3.back, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.up + Vector3.back, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.PositiveYNegativeZ;
                         }
                         Handles.color = new Color(0.4f, 0f, 0.3f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.down + Vector3.back, Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.down + Vector3.back, halfSize), Quaternion.identity, cubeSize, cubeSize, Handles.CubeHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Edges");
                             boxGripRef.enabledEdges ^= BoxGrip.Edges.NegativeYNegativeZ;
@@ -589,54 +590,53 @@ namespace SLZ.Marrow
                     }
                     if (boxGripRef.canBeCornerGrabbed)
 					{
-                        Handles.zTest = UnityEngine.Rendering.CompareFunction.LessEqual;
                         Handles.lighting = true;
-                        float cornerRadius = Mathf.Max(boxGripRef.cornerHandPoseRadius, 0.1f) * 1.25f;
+                        float cornerRadius = 0.035f * halfSize.magnitude;
                         //Corner handles
                         Handles.color = new Color(1f, 1f, 1f, 1f) * handlesColorMult;
-						if (Handles.Button(Vector3.right + Vector3.up + Vector3.forward, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+						if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.up + Vector3.forward, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
 						{
 							Undo.RecordObject(boxGripRef, "Change Corners");
 							boxGripRef.enabledCorners ^= BoxGrip.Corners.PositiveXPositiveYPositiveZ;
 						}
                         Handles.color = new Color(0f, 1f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.up + Vector3.forward, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.up + Vector3.forward, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.NegativeXPositiveYPositiveZ;
                         }
                         Handles.color = new Color(1f, 0f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.down + Vector3.forward, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.down + Vector3.forward, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.PositiveXNegativeYPositiveZ;
                         }
                         Handles.color = new Color(0f, 0f, 1f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.down + Vector3.forward, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.down + Vector3.forward, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.NegativeXNegativeYPositiveZ;
                         }
                         Handles.color = new Color(1f, 1f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.up + Vector3.back, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.up + Vector3.back, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.PositiveXPositiveYNegativeZ;
                         }
                         Handles.color = new Color(0f, 1f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.up + Vector3.back, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.up + Vector3.back, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.NegativeXPositiveYNegativeZ;
                         }
                         Handles.color = new Color(1f, 0f, 0f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.right + Vector3.down + Vector3.back, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.right + Vector3.down + Vector3.back, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.PositiveXNegativeYNegativeZ;
                         }
                         Handles.color = new Color(0.25f, 0.25f, 0.25f, 1f) * handlesColorMult;
-                        if (Handles.Button(Vector3.left + Vector3.down + Vector3.back, Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
+                        if (Handles.Button(Vector3.Scale(Vector3.left + Vector3.down + Vector3.back, halfSize), Quaternion.identity, cornerRadius, cornerRadius, Handles.SphereHandleCap))
                         {
 							Undo.RecordObject(boxGripRef, "Change Corners");
                             boxGripRef.enabledCorners ^= BoxGrip.Corners.NegativeXNegativeYNegativeZ;
