@@ -386,6 +386,13 @@ namespace SLZ.MarrowEditor
                 }
             }
 
+            EditorGUILayout.Space();
+
+            if (GUILayout.Button(new GUIContent(" Call Brandon", EditorGUIUtility.IconContent("JLAIcon").image as Texture2D, "Call forth BrandonJLA for help"), GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 2), GUILayout.MaxWidth(EditorGUIUtility.singleLineHeight * 6.5f)))
+            {
+                Debug.Log("Brandon has been called!");
+            }
+
 #endif
             EditorGUILayout.Space();
             EditorGUI.BeginChangeCheck();
