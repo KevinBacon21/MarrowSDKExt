@@ -648,7 +648,6 @@ namespace SLZ.MarrowEditor
                 null
             );
 
-            Debug.Log(method);
             method.Invoke(
                 null,
                 new object[] { }
