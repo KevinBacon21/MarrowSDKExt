@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Cysharp.Threading.Tasks;
 using SLZ.Marrow;
-using UnityEngine;
-using UnityEditor;
 using SLZ.Marrow.Warehouse;
+using UnityEditor;
+using UnityEngine;
+
 
  
 
@@ -391,6 +393,9 @@ namespace SLZ.MarrowEditor
             if (GUILayout.Button(new GUIContent(" Call Brandon", EditorGUIUtility.IconContent("JLAIcon").image as Texture2D, "Call forth BrandonJLA for help"), GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 2), GUILayout.MaxWidth(EditorGUIUtility.singleLineHeight * 6.5f)))
             {
                 Debug.Log("Brandon has been called!");
+                AudioClip brandonClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Editor Default Resources/whatbrandon.mp3");
+                StopAllClips();
+                PlayClip(brandonClip);
             }
 
 #endif
@@ -609,6 +614,46 @@ namespace SLZ.MarrowEditor
             }
 
             return Array.Empty<string>();
+        }
+
+        public static void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
+        {
+            Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+
+            Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+            MethodInfo method = audioUtilClass.GetMethod(
+                "PlayPreviewClip",
+                BindingFlags.Static | BindingFlags.Public,
+                null,
+                new Type[] { typeof(AudioClip), typeof(int), typeof(bool) },
+                null
+            );
+
+            Debug.Log(method);
+            method.Invoke(
+                null,
+                new object[] { clip, startSample, loop }
+            );
+        }
+
+        public static void StopAllClips()
+        {
+            Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+
+            Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+            MethodInfo method = audioUtilClass.GetMethod(
+                "StopAllPreviewClips",
+                BindingFlags.Static | BindingFlags.Public,
+                null,
+                new Type[] { },
+                null
+            );
+
+            Debug.Log(method);
+            method.Invoke(
+                null,
+                new object[] { }
+            );
         }
     }
 }
