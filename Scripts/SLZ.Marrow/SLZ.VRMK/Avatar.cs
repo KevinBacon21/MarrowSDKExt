@@ -555,6 +555,18 @@ namespace SLZ.VRMK
         public Transform twistForearmLf;
         public Transform twistForearmRt;
         public Transform twistUpperThighLf;
+        private float _agility;
+        private float _speed;
+        private float _strengthUpper;
+        private float _strengthLower;
+        private float _vitality;
+        private float _massArm;
+        private float _massChest;
+        private float _massHead;
+        private float _massLeg;
+        private float _massPelvis;
+        private float _massTotal;
+        private float _strengthGrip;
         public Transform twistUpperThighRt;
         [Tooltip("Crown of head Y from EyeHeight / eyeHeight. Default is .068")]
         [Range(.02f, .2f)]
