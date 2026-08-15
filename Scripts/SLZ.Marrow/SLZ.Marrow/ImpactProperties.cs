@@ -13,6 +13,8 @@ using SLZ.Marrow.Warehouse;
  
 using UnityEditor;
 
+using SLZ.Data;
+
 namespace SLZ.Marrow
 {
     [AddComponentMenu("MarrowSDK/Impact Properties")]
@@ -29,6 +31,9 @@ namespace SLZ.Marrow
             Collider = 0,
         };
         public DecalType decalType;
+
+        private SurfaceData _cachedSurfaceData;
+        public void SetupSurfaceData() { }
 #if UNITY_EDITOR
         [HideInInspector]
         public static SurfaceDataCard surfaceDataBrush;
