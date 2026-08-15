@@ -29,6 +29,7 @@ namespace SLZ.VRMK
         public SkinnedMeshRenderer[] hairMeshes;
         [Range(0f, .16f)]
         public float eyeOffset = .02f;
+        private SurfaceData surfaceData;
         public SoftEllipse wristEllipse
         {
             get
