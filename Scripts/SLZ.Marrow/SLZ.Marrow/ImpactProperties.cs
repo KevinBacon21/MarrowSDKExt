@@ -6,14 +6,13 @@
  
  
 using UnityEngine;
+using SLZ.Data;
 using SLZ.Marrow.Combat;
  
 using SLZ.Marrow.Interaction;
 using SLZ.Marrow.Warehouse;
  
 using UnityEditor;
-
-using SLZ.Data;
 
 namespace SLZ.Marrow
 {
@@ -31,7 +30,6 @@ namespace SLZ.Marrow
             Collider = 0,
         };
         public DecalType decalType;
-
         private SurfaceData _cachedSurfaceData;
         public void SetupSurfaceData() { }
 #if UNITY_EDITOR
