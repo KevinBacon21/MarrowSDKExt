@@ -29,7 +29,6 @@ namespace SLZ.VRMK
         public SkinnedMeshRenderer[] hairMeshes;
         [Range(0f, .16f)]
         public float eyeOffset = .02f;
-        private SurfaceData surfaceData;
         public SoftEllipse wristEllipse
         {
             get
@@ -555,7 +554,9 @@ namespace SLZ.VRMK
         public Transform twistForearmLf;
         public Transform twistForearmRt;
         public Transform twistUpperThighLf;
-        private float _agility;
+        public Transform twistUpperThighRt;
+		
+		private float _agility;
         private float _speed;
         private float _strengthUpper;
         private float _strengthLower;
@@ -567,7 +568,8 @@ namespace SLZ.VRMK
         private float _massPelvis;
         private float _massTotal;
         private float _strengthGrip;
-        public Transform twistUpperThighRt;
+        private SurfaceData surfaceData;
+
         [Tooltip("Crown of head Y from EyeHeight / eyeHeight. Default is .068")]
         [Range(.02f, .2f)]
         [SerializeField]
