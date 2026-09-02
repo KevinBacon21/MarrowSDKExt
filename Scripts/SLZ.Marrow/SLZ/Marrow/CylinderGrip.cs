@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using SLZ.Marrow.Utilities;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace SLZ.Marrow
 {
@@ -14,7 +17,7 @@ namespace SLZ.Marrow
 		public float staticFriction;
 
 		[Tooltip("Meters plus and minus")]
-		public float limit;
+		public float limit = 0.1f;
 
 		public bool hasCapA;
 
@@ -179,6 +182,66 @@ namespace SLZ.Marrow
 
 		private void OnDrawGizmosSelected()
 		{
+			Vector3 lengthPosition = new Vector3(0, 0, limit);
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+            Gizmos.color = Color.blue;
+			Gizmos.DrawLine(-lengthPosition, lengthPosition);
 		}
 	}
+
+#if UNITY_EDITOR
+	[CustomEditor(typeof(CylinderGrip))]
+	public class CylinderGripHandles : Editor
+	{
+        private void OnSceneGUI()
+        {
+            CylinderGrip cylinderGripReference = (CylinderGrip)target;
+			Transform cylinderGripTransform = cylinderGripReference.transform;
+            Vector3 lengthPosition = new Vector3(0, 0, cylinderGripReference.limit);
+            Handles.matrix = Matrix4x4.TRS(cylinderGripTransform.position, cylinderGripTransform.rotation, Vector3.one);
+            Handles.color = Color.red;
+			Handles.DrawWireDisc(Vector3.zero - lengthPosition, Vector3.forward, cylinderGripReference.radius);
+			Handles.DrawWireDisc(Vector3.zero + lengthPosition, Vector3.forward, cylinderGripReference.radius);
+
+			Handles.color = Color.yellow;
+			Handles.DrawWireDisc(Vector3.zero, Vector3.forward, cylinderGripReference.radius);
+
+			float size = HandleUtility.GetHandleSize(cylinderGripTransform.position) * 1f;
+
+			EditorGUI.BeginChangeCheck();
+
+			if (cylinderGripReference.radius <= 0)
+			{
+				cylinderGripReference.radius = 0.001f;
+			}
+
+			Handles.color = Color.magenta;
+			float newRadius = Handles.ScaleSlider(cylinderGripReference.radius, Vector3.zero, Vector3.right, Quaternion.identity, size * 1.25f, 0.01f);
+
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(cylinderGripReference, "Change radius");
+				cylinderGripReference.radius = Mathf.Max(newRadius, 0);
+			}
+
+			EditorGUI.BeginChangeCheck();
+
+			if (cylinderGripReference.radius <= 0)
+			{
+				cylinderGripReference.radius = 0.001f;
+			}
+
+			Handles.color = Color.cyan;
+			float newLimit = Handles.ScaleSlider(cylinderGripReference.limit, Vector3.zero, Vector3.forward, Quaternion.identity, size * 1.5f, 0.01f);
+
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(cylinderGripReference, "Change limit");
+				cylinderGripReference.limit = Mathf.Max(newLimit, 0);
+			}
+
+
+        }
+    }
+#endif
 }
