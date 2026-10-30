@@ -347,6 +347,7 @@ namespace SLZ.MarrowEditor
                             if (GUILayout.Button(new GUIContent("Pack for Both", "Build the pallet into a mod for all supported platforms (PC/Quest)"), GUILayout.ExpandWidth(false)))
                             {
                                 packForBoth();
+                                installSuccess = null;
                             }
 
                             GUILayout.FlexibleSpace();
