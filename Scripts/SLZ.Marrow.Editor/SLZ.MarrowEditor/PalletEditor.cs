@@ -77,7 +77,7 @@ namespace SLZ.MarrowEditor
             if (packPalletIcon == null)
                 packPalletIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(MarrowSDK.GetPackagePath("Editor/Assets/Icons/Warehouse/packed-pallet.png"));
             if (finishedPackClip == null)
-                finishedPackClip = AssetDatabase.LoadAssetAtPath<AudioClip>(MarrowSDK.GetPackagePath("Editor/Assets/pack-finish.mp3"));
+                finishedPackClip = AssetDatabase.LoadAssetAtPath<AudioClip>(MarrowSDK.GetPackagePath("Editor/Assets/finishedPackClip.mp3"));
             if (brandonIcon == null)
                 brandonIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(MarrowSDK.GetPackagePath("Assets/JLAIcon.png"));
             if (brandonClip == null)
