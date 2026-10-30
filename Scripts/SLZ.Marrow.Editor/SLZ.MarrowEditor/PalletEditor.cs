@@ -3,11 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using SLZ.Marrow;
-using UnityEngine;
-using UnityEditor;
 using SLZ.Marrow.Warehouse;
+using UnityEditor;
+using UnityEngine;
+
 
  
 
@@ -340,6 +343,13 @@ namespace SLZ.MarrowEditor
                                 installSuccess = null;
                             }
 
+
+                            if (GUILayout.Button(new GUIContent("Pack for Both", "Build the pallet into a mod for all supported platforms (PC/Quest)"), GUILayout.ExpandWidth(false)))
+                            {
+                                packForBoth();
+                                installSuccess = null;
+                            }
+
                             GUILayout.FlexibleSpace();
                         }
 
@@ -385,6 +395,8 @@ namespace SLZ.MarrowEditor
                     GUILayout.FlexibleSpace();
                 }
             }
+
+            EditorGUILayout.Space();
 
 #endif
             EditorGUILayout.Space();
@@ -567,6 +579,20 @@ namespace SLZ.MarrowEditor
                 QueueEditorUpdateLoop.StopEditorUpdateLoop();
                 packing = false;
             }
+        }
+
+        private async Task packForBoth()
+        {
+            var currentTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            var currentTarget = EditorUserBuildSettings.activeBuildTarget;
+
+            PackPalletWithValidation(pallet, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64, EditorPrefs.GetBool("PackWithDedupe", false)).Forget();
+
+            await UniTask.WaitUntil(() => !packing);
+
+            PackPalletWithValidation(pallet, BuildTargetGroup.Android, BuildTarget.Android, EditorPrefs.GetBool("PackWithDedupe", false)).Forget();
+
+            EditorUserBuildSettings.SwitchActiveBuildTarget(currentTargetGroup, currentTarget);
         }
 
         private string[] GetPalletBarcodesFromMarrowGamePath(string gamePath)
