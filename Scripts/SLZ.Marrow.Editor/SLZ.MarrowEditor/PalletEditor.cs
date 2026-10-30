@@ -37,6 +37,9 @@ namespace SLZ.MarrowEditor
         private Texture2D avatarIcon;
         private Texture2D packPalletIcon;
         private Texture2D spawnableCrateIcon;
+        private AudioClip finishedPackClip;
+        private Texture2D brandonIcon;
+        private AudioClip brandonClip;
         Pallet pallet;
         private static bool packing = false;
         private Nullable<bool> installSuccess = null;
@@ -73,6 +76,12 @@ namespace SLZ.MarrowEditor
                 spawnableCrateIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(MarrowSDK.GetPackagePath("Editor/Assets/Icons/Warehouse/crate-ball.png"));
             if (packPalletIcon == null)
                 packPalletIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(MarrowSDK.GetPackagePath("Editor/Assets/Icons/Warehouse/packed-pallet.png"));
+            if (finishedPackClip == null)
+                finishedPackClip = AssetDatabase.LoadAssetAtPath<AudioClip>(MarrowSDK.GetPackagePath("Editor/Assets/pack-finish.mp3"));
+            if (brandonIcon == null)
+                brandonIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(MarrowSDK.GetPackagePath("Assets/JLAIcon.png"));
+            if (brandonClip == null)
+                brandonClip = AssetDatabase.LoadAssetAtPath<AudioClip>(MarrowSDK.GetPackagePath("Assets/whatbrandon.mp3"));
             if (!scannableIconCache.ContainsKey(typeof(DataCard)))
             {
                 scannableIconCache[typeof(DataCard)] = AssetDatabase.LoadAssetAtPath<Texture2D>(MarrowSDK.GetPackagePath("Editor/Assets/Icons/Warehouse/datacard.png"));
@@ -334,19 +343,21 @@ namespace SLZ.MarrowEditor
                             if (GUILayout.Button(new GUIContent("Pack for PC", "Build the pallet for PC"), GUILayout.ExpandWidth(false)))
                             {
                                 PackPalletWithValidation(pallet, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64, EditorPrefs.GetBool("PackWithDedupe", false)).Forget();
+                                WaitForPackEnd();
                                 installSuccess = null;
                             }
 
                             if (GUILayout.Button(new GUIContent("Pack for Quest", "Build the pallet for Android"), GUILayout.ExpandWidth(false)))
                             {
                                 PackPalletWithValidation(pallet, BuildTargetGroup.Android, BuildTarget.Android, EditorPrefs.GetBool("PackWithDedupe", false)).Forget();
+                                WaitForPackEnd();
                                 installSuccess = null;
                             }
 
 
                             if (GUILayout.Button(new GUIContent("Pack for Both", "Build the pallet into a mod for all supported platforms (PC/Quest)"), GUILayout.ExpandWidth(false)))
                             {
-                                packForBoth();
+                                PackForBoth();
                                 installSuccess = null;
                             }
 
@@ -398,10 +409,9 @@ namespace SLZ.MarrowEditor
 
             EditorGUILayout.Space();
 
-            if (GUILayout.Button(new GUIContent(" Call Brandon", EditorGUIUtility.IconContent("JLAIcon").image as Texture2D, "Call forth BrandonJLA for help"), GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 2), GUILayout.MaxWidth(EditorGUIUtility.singleLineHeight * 6.5f)))
+            if (GUILayout.Button(new GUIContent(" Call Brandon", brandonIcon, "Call forth BrandonJLA for help"), GUILayout.ExpandWidth(false), GUILayout.Height(EditorGUIUtility.singleLineHeight * 2), GUILayout.MaxWidth(EditorGUIUtility.singleLineHeight * 6.5f)))
             {
                 Debug.Log("Brandon has been called!");
-                AudioClip brandonClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Editor Default Resources/whatbrandon.mp3");
                 StopAllClips();
                 PlayClip(brandonClip);
             }
@@ -589,7 +599,7 @@ namespace SLZ.MarrowEditor
             }
         }
 
-        private async Task packForBoth()
+        private async Task PackForBoth()
         {
             var currentTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             var currentTarget = EditorUserBuildSettings.activeBuildTarget;
@@ -601,6 +611,15 @@ namespace SLZ.MarrowEditor
             PackPalletWithValidation(pallet, BuildTargetGroup.Android, BuildTarget.Android, EditorPrefs.GetBool("PackWithDedupe", false)).Forget();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(currentTargetGroup, currentTarget);
+
+            WaitForPackEnd();
+        }
+
+        private async Task WaitForPackEnd()
+        {
+            await UniTask.WaitUntil(() => !packing);
+
+            PlayClip(finishedPackClip);
         }
 
         private string[] GetPalletBarcodesFromMarrowGamePath(string gamePath)
